@@ -46,31 +46,31 @@ class autoencoder(nn.Module):
             for i in range(2, self.aux_dep+1):
                 self.encs.append(make_wct_aux_enc_layers(cfg[i-1], cfg[i])) #conv2~5
             self.encs = nn.ModuleList(self.encs)  #compatible with DataParallel
-            print 'encoder stacks', len(self.encs), 'of', self.aux_dep
+            print('encoder stacks', len(self.encs), 'of', self.aux_dep)
             self.train_dec = train_dec
             self.base_dep = base_dep
             self.gram_dep = gram_dep
             self.perc_dep = perc_dep
             if train_dec:
                 self.dec = make_tr_dec_layers(dec_cfg[self.dep], use_sgm=use_sgm)
-                print 'autoencoder init: need decoder training'
+                print('autoencoder init: need decoder training')
             else:
                 self.dec = make_wct_dec_layers(dec_cfg[self.dep])
-                print 'autoencoder init: wct: please load decoder'
+                print('autoencoder init: wct: please load decoder')
         else:
-            print 'autoencoder: init: flag not supported: ', flag
+            print('autoencoder: init: flag not supported: ', flag)
 
 
     def load_from_torch(self, ptm, thm, th_cfg):
-        print ptm, thm
+        print(ptm, thm)
         i = 0
         for layer in list(ptm):
             if isinstance(layer, nn.Conv2d):
-                print i, '/', len(th_cfg), ':', th_cfg[i]
+                print(i, '/', len(th_cfg), ':', th_cfg[i])
                 layer.weight = th.nn.Parameter(thm.get(th_cfg[i]).weight.float())
                 layer.bias = th.nn.Parameter(thm.get(th_cfg[i]).bias.float())
                 i += 1
-        print 'wct load torch #convs', len(th_cfg), i
+        print('wct load torch #convs', len(th_cfg), i)
 
 
     def load_aux_from_torch(self, ptm, thm, th_cfg, aux_cfg):
@@ -83,26 +83,26 @@ class autoencoder(nn.Module):
 
         for layer in list(ptm):
             if isinstance(layer, nn.Conv2d):
-                print i, '/', len(aux_cfg), ':', aux_cfg[i]
+                print(i, '/', len(aux_cfg), ':', aux_cfg[i])
                 layer.weight = th.nn.Parameter(thm.get(aux_cfg[i]).weight.float())
                 layer.bias = th.nn.Parameter(thm.get(aux_cfg[i]).bias.float())
                 i += 1
-        print 'wct load aux torch #convs', len(th_cfg), '-', len(aux_cfg), i
+        print('wct load aux torch #convs', len(th_cfg), '-', len(aux_cfg), i)
 
 
     def load_model(self, enc_model = 'models/wct/vgg_normalised_conv5_1.t7', dec_model = None):
         if self.flag == 'wct':
-            print 'load encoder from:', enc_model
+            print('load encoder from:', enc_model)
             vgg = load_lua(enc_model)
             self.load_from_torch(self.encs[0], vgg, th_cfg[1]) #conv1
             for i in range(2, self.aux_dep+1):
                 self.load_aux_from_torch(self.encs[i-1], vgg, th_cfg[i-1], th_cfg[i])
             if not self.train_dec and dec_model is not None and dec_model.lower() != 'none':
-                print 'load decoder from:', dec_model
+                print('load decoder from:', dec_model)
                 vgg = load_lua(dec_model)
                 self.load_from_torch(self.dec, vgg, th_dec_cfg[self.dep])
         else:
-            print 'autoencoder: load: flag not supported', flag
+            print('autoencoder: load: flag not supported', flag)
 
 
     def enc_dec(self, input):
@@ -192,7 +192,7 @@ class mask_autoencoder(autoencoder):
         checkpoint = th.load(load_model)
         self.senc.load_state_dict(checkpoint['st_enc'])
         self.dec.load_state_dict(checkpoint['dec'])
-        print 'wct_autoencoder: aux st enc layer loaded from:', load_model
+        print('wct_autoencoder: aux st enc layer loaded from:', load_model)
 
 
 

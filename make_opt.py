@@ -166,7 +166,7 @@ def get_optimizer(net, args, flag, lr):
     elif flag == 'sgd':
         optimizer = optim.SGD(net.parameters(), lr=lr, momentum=args.momentum, weight_decay=args.weight_decay)
     else:
-        print 'unknown optimizer name, use SGD!'
+        print('unknown optimizer name, use SGD!')
         optimizer = optim.SGD(net.parameters(), lr=lr, momentum=args.momentum, weight_decay=args.weight_decay)
     return optimizer
 
@@ -181,7 +181,7 @@ def get_optimizer_var(var, args, flag, lr): #for variables
     elif flag == 'sgd':
         optimizer = optim.SGD(var, lr=lr, momentum=args.momentum, weight_decay=args.weight_decay)
     else:
-        print 'unknown optimizer name, use SGD!'
+        print('unknown optimizer name, use SGD!')
         optimizer = optim.SGD(var, lr=lr, momentum=args.momentum, weight_decay=args.weight_decay)
     return optimizer
 
@@ -191,7 +191,7 @@ def adjust_learning_rate(optimizer, init_lr, args, epoch, flag='linear'):
     if flag == 'segment':
         if epoch % args.lr_freq == 0:
             lr = init_lr * (0.1 ** (epoch // args.lr_freq))
-            print 'epoch %d learning rate schedule to %f'%(epoch, lr)
+            print('epoch %d learning rate schedule to %f'%(epoch, lr))
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
     elif flag == 'linear':
@@ -199,10 +199,10 @@ def adjust_learning_rate(optimizer, init_lr, args, epoch, flag='linear'):
         p =  (s+1)*args.lr_freq - epoch
         elr = init_lr * (0.1**s)
         lr = elr + ( min(init_lr, elr*10) - elr)*float(p)/float(args.lr_freq)
-        print 'epoch %d learning rate schedule to %f'%(epoch, lr)
+        print('epoch %d learning rate schedule to %f'%(epoch, lr))
         for param_group in optimizer.param_groups:
             param_group['lr'] = lr
     else:
-        print 'make_opt: unknown flag for adjusting learning rates'
+        print('make_opt: unknown flag for adjusting learning rates')
 
 

@@ -105,23 +105,23 @@ def get_model_parameters(net):
     n = 0.0
     for para in net.parameters():
         n += para.numel()
-    print 'network parameters', n/1.0e6, 'M'
+    print('network parameters', n/1.0e6, 'M')
 
 def get_dise_cfg(s): #input is the string
     if s == '3':
-        print 'three dise layers'
+        print('three dise layers')
         return '128,128,128'
     elif s == '4':
-        print 'four dise layers'
+        print('four dise layers')
         return '256,D,256,256,U,128'
     elif s == '4w':
-        print 'four wide dise layers'
+        print('four wide dise layers')
         return '256,D,512,512,U,256'
     elif s == '5':
-        print 'four dise layers'
+        print('four dise layers')
         return '256,D,256,256,256,U,128'
     else:
-        print 'custom dise layers, returned'
+        print('custom dise layers, returned')
         return s
 
 def get_base_dep(s):
@@ -132,5 +132,5 @@ def get_base_dep(s):
     elif s == '4':
         return {4}
     else:
-        print 'unknown base_dep mode: use c3 as default'
+        print('unknown base_dep mode: use c3 as default')
         return {0,1,2,3}

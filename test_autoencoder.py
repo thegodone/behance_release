@@ -46,25 +46,26 @@ from datetime import datetime
 import shutil
 
 args = utils.get_autoencoder_args()
-print '%s_%s'%(args.dataset, args.model)
-print datetime.now(), args, '\n============================'
-
+args.use_cpu = True
+print('%s_%s'%(args.dataset, args.model))
+print(datetime.now(), args, '\n============================')
 
 use_cuda = th.cuda.is_available() and not args.use_cpu
+use_cuda = False
+print(use_cuda)
 dtype = th.cuda.FloatTensor if use_cuda else th.FloatTensor
 
 th.manual_seed(args.seed)
 gids = args.gpuid.split(',')
 gids = [int(x) for x in gids]
-print 'deploy on GPUs:', gids
+print('deploy on GPUs:', gids)
 if use_cuda:
     if len(gids) == 1:
         th.cuda.set_device(gids[0])
     else:
         th.cuda.set_device(gids[0])
-        print 'use single GPU', gids[0]
+        print('use single GPU', gids[0])
     th.cuda.manual_seed(args.seed)
-
 
 st_cfg = utils.get_dise_cfg(args.st_layers).split(',')
 cnt_cfg = utils.get_dise_cfg(args.cnt_layers).split(',')
@@ -78,13 +79,11 @@ if use_cuda:
 ae.eval()
 
 def open_dp(layer):
-    print type(layer)
+    print(type(layer))
     if type(layer) == nn.Dropout:
         layer.train()
 if args.test_dp:
     ae.apply(open_dp)
-
-
 
 if args.diag_flag is not None and args.diag_flag == 'batch': #batch testing of results
     #load data
@@ -111,7 +110,7 @@ if args.diag_flag is not None and args.diag_flag == 'batch': #batch testing of r
     for bi,(inputs,labels) in enumerate(cnt_loader): #iter all content test, random select same number of style images
         l=labels[0]
         if use_cuda:
-            inputs, labels = inputs.cuda(async=True), labels.cuda(async=True)
+            inputs, labels = inputs.cuda(), labels.cuda()
         inputs,labels = Variable(inputs,volatile=True), Variable(labels,volatile=True)
         for bj,(st_inputs,st_labels) in enumerate(st_loader): #iter all content test, random select same number of style images
             #if l == st_labels[0]:  #same folder
@@ -123,7 +122,7 @@ if args.diag_flag is not None and args.diag_flag == 'batch': #batch testing of r
                     os.makedirs(save_folder)
                     os.chmod(save_folder, 0o777)
                 if use_cuda:
-                    st_inputs, st_labels = st_inputs.cuda(async=True), st_labels.cuda(async=True)
+                    st_inputs, st_labels = st_inputs.cuda(), st_labels.cuda()
                 st_inputs,st_labels = Variable(st_inputs,volatile=True), Variable(st_labels,volatile=True)
 
                 #forward pass
@@ -151,7 +150,7 @@ if args.diag_flag is not None and args.diag_flag == 'batch': #batch testing of r
                 mstd_img = (mstd_img - th.min(mstd_img))/(th.max(mstd_img) - th.min(mstd_img))
                 tmp = mstd_img.data[0].clamp_(0, 1)
                 imsave(tmp, '%s/c%d_s%d_%d_maskstd2.jpg'%(save_folder, bi, bj, 12))
-    print 'complete!'
+    print('complete!')
 
 else:  #test for one image
-    print 'unsupported testing mode'
+    print('unsupported testing mode')
